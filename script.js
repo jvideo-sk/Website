@@ -49,7 +49,7 @@ function setupAge() {
     };
 
     updateAge();
-    window.setInterval(updateAge, 100);
+    window.setInterval(updateAge, 1);
 }
 
 async function loadProjects() {
