@@ -57,22 +57,17 @@ async function loadProjects() {
     if (!container) return;
 
     try {
-        const response = await fetch(
-            "https://api.github.com/users/jvideo-sk/repos?type=owner&sort=updated&per_page=100",
-            {
-                headers: {
-                    Accept: "application/vnd.github+json"
-                },
-                cache: "no-store"
-            }
-        );
+        const response = await fetch("/projects.json", {
+            headers: { Accept: "application/json" },
+            cache: "no-store"
+        });
 
         if (!response.ok) {
-            throw new Error(`GitHub API returned ${response.status}`);
+            throw new Error(`Projects data returned ${response.status}`);
         }
 
         const repos = await response.json();
-        const visibleRepos = repos.filter(repo => !repo.fork);
+        const visibleRepos = Array.isArray(repos) ? repos : [];
 
         container.replaceChildren();
 
@@ -81,6 +76,9 @@ async function loadProjects() {
             card.innerHTML = `
                 <h2>No projects yet</h2>
                 <p>Nothing to show here right now.</p>
+                <a href="https://github.com/jvideo-sk?tab=repositories" target="_blank" rel="noopener noreferrer">
+                    View Repositories on GitHub →
+                </a>
             `;
             container.appendChild(card);
             return;
@@ -90,7 +88,7 @@ async function loadProjects() {
             const card = document.createElement("article");
 
             const title = document.createElement("h2");
-            title.textContent = repo.name;
+            title.textContent = repo.name || "Untitled project";
 
             const description = document.createElement("p");
             description.textContent = repo.description || "No description provided.";
@@ -105,14 +103,14 @@ async function loadProjects() {
             container.appendChild(card);
         }
     } catch (error) {
-        console.error("Failed to load GitHub projects:", error);
+        console.error("Failed to load project data:", error);
 
         container.replaceChildren();
 
         const card = document.createElement("article");
         card.innerHTML = `
             <h2>Couldn't load projects</h2>
-            <p>GitHub isn't responding right now. Try refreshing the page.</p>
+            <p>The project list is temporarily unavailable.</p>
             <a href="https://github.com/jvideo-sk?tab=repositories" target="_blank" rel="noopener noreferrer">
                 View Repositories on GitHub →
             </a>
